@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage } from "element-plus";
 
 // create instance of axios
 const service = axios.create({
@@ -18,13 +18,13 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   (response: any) => {
-    if (response.data.code != 200) {
+    if (response.status != 200) {
       ElMessage({
-        message: response.data.message,
+        message: response.message,
         type: "error",
         duration: 5000,
       });
-      return Promise.reject(response.data);
+      return Promise.reject(response.message);
     }
     return response.data;
   },
