@@ -1,22 +1,27 @@
 <template>
-  <el-form
-    :model="searchObj"
-    label-width="auto"
-    style="display: flex"
-    class="justify-content-center"
-  >
-    <el-form-item>
-      <el-input placeholder="name" v-model="hosName" />
-    </el-form-item>
+  <div style="display: flex" class="justify-content-center">
+    <el-autocomplete
+      v-model="hosName"
+      :fetch-suggestions="querySearchAsync"
+      :trigger-on-focus="false"
+      clearable
+      class="inline-input w-50"
+      placeholder="Please Input Name"
+      @select="handleSelect"
+    />
     <el-button type="primary" @click="searchHandler">
       <el-icon>
         <ElIconSearch />
       </el-icon>
     </el-button>
-  </el-form>
-  <div style="display: flex" class="justify-content-center">
+  </div>
+  <div
+    v-if="data.commons"
+    style="display: flex"
+    class="justify-content-center my-2"
+  >
     <el-button
-      v-for="(c, idx) in data?.commons"
+      v-for="(c, idx) in data.commons"
       :type="currentIdx === idx ? 'primary' : ''"
       circle
       class="mx-2"
@@ -25,16 +30,17 @@
       {{ c.name }}
     </el-button>
   </div>
-  <div v-show="data" class="container row my-2 justify-content-center">
+  <div v-if="data.list" class="row my-2 justify-content-center">
     <el-card
-      style="max-width: 360px"
-      v-for="(h, idx) in data?.list"
+      style="max-width: 360px; cursor: pointer"
+      v-for="(h, idx) in data.list"
       :key="idx"
       class="m-2"
+      @click="clickCardHandler(h.id)"
     >
       <template #header>
         <div class="card-header">
-          <span>{{ h.hosName }}</span>
+          <span>HosName: {{ h.hosName }}</span>
         </div>
       </template>
       <p>Level: {{ h.level }}</p>
@@ -47,6 +53,14 @@
 import hospApi from "~/apis/hospApi";
 import commonApi from "~/apis/commonApi";
 import { ElLoading } from "element-plus";
+import type { Hospital } from "~/types/Hospital";
+import type { Common } from "~/types/Common";
+
+interface Data {
+  list: Hospital[];
+  totalPages: number;
+  commons: Common[];
+}
 
 const searchObj = reactive({ hosName: "", dictCode: 0 });
 let { hosName, dictCode } = toRefs(searchObj);
@@ -57,8 +71,13 @@ let loadingInstance = ElLoading.service({
   fullscreen: true,
   text: "Loading...",
 });
+const data: Data = reactive({
+  list: [],
+  totalPages: 0,
+  commons: [],
+});
 
-const { data, error } = await useAsyncData(
+const { data: resData, error } = await useAsyncData(
   "hospList",
   async () => {
     const query =
@@ -68,11 +87,15 @@ const { data, error } = await useAsyncData(
       commonApi.findChildrenData(1),
     ]);
 
-    return {
+    const obj: Data = {
       list: hospRes.data.content,
       totalPages: hospRes.data.totalPages,
       commons: [{ id: -1, name: "All" }, ...commonRes.data],
     };
+    data.list = obj.list;
+    data.commons = obj.commons;
+    data.totalPages = obj.totalPages;
+    return obj;
   },
   {
     watch: [page, dictCode],
@@ -85,21 +108,39 @@ if (error.value) {
     type: "error",
     duration: 5000,
   });
+} else if (resData.value) {
+  data.list = resData.value.list;
+  data.commons = resData.value.commons;
+  data.totalPages = resData.value.totalPages;
 }
 
 async function searchHandler() {
-  const res = await hospApi.getPageList(page.value, limit.value, searchObj);
-  if (data.value) {
-    for (let i = 0; i < data.value.list.length; i++) {
-      data.value.list.pop();
-    }
-  }
-  res.data.content.forEach((d: any) => data.value?.list.push(d));
+  const query = currentIdx.value === 0 ? { hosName: hosName.value } : searchObj;
+  const res = await hospApi.getPageList(page.value, limit.value, query);
+  data.list = [];
+  res.data.content.forEach((d: any) => data.list.push(d));
 }
 
 function levelChangeHandler(code: number, idx: number) {
   dictCode.value = code;
   currentIdx.value = idx;
+}
+
+function clickCardHandler(id: string) {}
+
+function querySearchAsync(queryString: string, cb: (arg: any) => void) {
+  if (!queryString) return;
+  hospApi.getByHosName(queryString).then((res) => {
+    cb(
+      res.data.map((h: Hospital) => {
+        return { value: h.hosName };
+      })
+    );
+  });
+}
+function handleSelect(item: Record<string, any>) {
+  hosName.value = item.value;
+  searchHandler();
 }
 
 onBeforeMount(() => {
@@ -109,7 +150,7 @@ onBeforeMount(() => {
   });
 });
 
-onMounted(() => {
+onMounted(async () => {
   loadingInstance.close();
 });
 

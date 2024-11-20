@@ -12,7 +12,7 @@ export default {
   },
   getByHosName(hosName: string) {
     return request({
-      url: `${API_NAME}/findByHosName/${hosName}`,
+      url: `${API_NAME}/findHospByHosName/${hosName}`,
       method: "get",
     });
   },
