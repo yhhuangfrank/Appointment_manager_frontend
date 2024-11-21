@@ -16,4 +16,10 @@ export default {
       method: "get",
     });
   },
+  getById(id: string) {
+    return request({
+      url: `${API_NAME}/${id}`,
+      method: "get",
+    });
+  },
 };

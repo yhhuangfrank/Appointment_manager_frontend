@@ -18,13 +18,13 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   (response: any) => {
-    if (response.status != 200) {
+    if (response.status !== 200) {
       ElMessage({
-        message: response.message,
+        message: response.data,
         type: "error",
         duration: 5000,
       });
-      return Promise.reject(response.message);
+      return Promise.reject(response.data);
     }
     return response.data;
   },

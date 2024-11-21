@@ -92,9 +92,7 @@ const { data: resData, error } = await useAsyncData(
       totalPages: hospRes.data.totalPages,
       commons: [{ id: -1, name: "All" }, ...commonRes.data],
     };
-    data.list = obj.list;
-    data.commons = obj.commons;
-    data.totalPages = obj.totalPages;
+    copyProps(obj, data);
     return obj;
   },
   {
@@ -109,9 +107,7 @@ if (error.value) {
     duration: 5000,
   });
 } else if (resData.value) {
-  data.list = resData.value.list;
-  data.commons = resData.value.commons;
-  data.totalPages = resData.value.totalPages;
+  copyProps(resData.value, data);
 }
 
 async function searchHandler() {
@@ -126,21 +122,28 @@ function levelChangeHandler(code: number, idx: number) {
   currentIdx.value = idx;
 }
 
-function clickCardHandler(id: string) {}
+function clickCardHandler(id: string) {
+  window.location.href = `/hosp/${id}`;
+}
 
 function querySearchAsync(queryString: string, cb: (arg: any) => void) {
   if (!queryString) return;
   hospApi.getByHosName(queryString).then((res) => {
-    cb(
-      res.data.map((h: Hospital) => {
-        return { value: h.hosName };
-      })
-    );
+    const resultList = res.data.map((h: Hospital) => {
+      return { value: h.hosName };
+    });
+    cb(resultList);
   });
 }
 function handleSelect(item: Record<string, any>) {
   hosName.value = item.value;
   searchHandler();
+}
+
+function copyProps(src: any, dest: any) {
+  for (const key in src) {
+    dest[key] = src[key];
+  }
 }
 
 onBeforeMount(() => {
