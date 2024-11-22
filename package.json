@@ -10,7 +10,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@types/js-cookie": "^3.0.6",
     "axios": "^1.7.7",
+    "js-cookie": "^3.0.5",
     "nuxt": "^3.14.159",
     "usebootstrap": "^3.5.100",
     "vue": "latest",
