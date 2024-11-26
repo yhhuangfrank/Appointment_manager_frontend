@@ -10,4 +10,17 @@ export default {
       data: userInfo,
     });
   },
+  saveUserAuth(userAuth: any) {
+    return request({
+      url: `${API_NAME}/auth/userAuth`,
+      method: "post",
+      data: userAuth,
+    });
+  },
+  getUserInfo() {
+    return request({
+      url: `${API_NAME}/auth/userInfo`,
+      method: "get",
+    });
+  },
 };

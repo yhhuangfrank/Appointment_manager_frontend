@@ -7,14 +7,22 @@
   >
     <template #extra>
       <div class="flex items-center">
-        <el-button
-          v-if="isLogined"
-          type="primary"
-          class="ml-2"
-          @click="logOutHandler"
-        >
-          LogOut
-        </el-button>
+        <el-dropdown v-if="isLogined" @command="handleCommand">
+          <span class="el-dropdown-link">
+            Hello {{ userInfo.name ? userInfo.name : "" }} !
+            <el-icon class="el-icon--right">
+              <ElIconArrowDown />
+            </el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="user">Authenticate</el-dropdown-item>
+              <el-dropdown-item>Action 2</el-dropdown-item>
+              <el-dropdown-item>Action 3</el-dropdown-item>
+              <el-dropdown-item @click="logOutHandler">LogOut</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
         <el-button
           v-else
           type="primary"
@@ -63,6 +71,7 @@ let logInFormVisible = ref(false);
 let isLogined = ref(false);
 const userInfo = reactive({
   email: "",
+  name: "",
 });
 
 async function loginHandler() {
@@ -102,6 +111,10 @@ function setCookies(name: string, token: string) {
 function isValidEmail(email: string) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+}
+
+function handleCommand(command: string | number | object) {
+  window.location.href = `/${command}`;
 }
 
 onMounted(() => {
