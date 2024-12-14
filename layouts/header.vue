@@ -19,7 +19,7 @@
               <el-dropdown-item command="user">Authenticate</el-dropdown-item>
               <el-dropdown-item>Action 2</el-dropdown-item>
               <el-dropdown-item>Action 3</el-dropdown-item>
-              <el-dropdown-item @click="logOutHandler">LogOut</el-dropdown-item>
+              <el-dropdown-item command="logout">LogOut</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import userApi from "~/apis/userInfo";
+import userApi from "~/apis/userApi";
 import Cookies from "js-cookie";
 
 function goHome() {
@@ -114,7 +114,11 @@ function isValidEmail(email: string) {
 }
 
 function handleCommand(command: string | number | object) {
-  window.location.href = `/${command}`;
+  if (command === "logout") {
+    logOutHandler();
+  } else {
+    window.location.href = `/${command}`;
+  }
 }
 
 onMounted(() => {

@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 import type { UserInfo } from "~/types/UserInfo";
-import userApi from "~/apis/userInfo";
+import userApi from "~/apis/userApi";
 
 const userInfo: UserInfo = reactive({});
 

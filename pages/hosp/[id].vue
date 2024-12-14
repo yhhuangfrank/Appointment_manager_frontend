@@ -54,6 +54,7 @@
 
 <script lang="ts" setup>
 import hospApi from "~/apis/hospApi";
+import userApi from "~/apis/userApi";
 import type { Hospital } from "~/types/Hospital";
 import Cookies from "js-cookie";
 
@@ -70,10 +71,16 @@ const route = useRoute();
 const id = route.params.id as string;
 const emit = defineEmits(["login"]);
 
-function schedule() {
+async function schedule() {
   const token = Cookies.get("token");
   if (!token) {
     emit("login");
+    return;
+  }
+  const res = await userApi.getUserInfo();
+  const { authStatus } = res.data;
+  if (!authStatus || authStatus !== 2) {
+    window.location.href = "/user";
   }
 }
 
