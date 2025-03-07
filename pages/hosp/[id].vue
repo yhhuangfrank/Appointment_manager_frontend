@@ -81,7 +81,10 @@ async function schedule() {
   const { authStatus } = res.data;
   if (!authStatus || authStatus !== 2) {
     window.location.href = "/user";
+    return;
   }
+
+  window.location.href = "/hosp/schedule?hosCode=" + hosp.hosCode;
 }
 
 onBeforeMount(async () => {
